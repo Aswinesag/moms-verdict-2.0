@@ -1,0 +1,38 @@
+{
+  "summary_en": "This stroller is known for its comfort and smooth ride, with good quality construction.",
+  "summary_ar": "العربة مريحة جدًا وسهلة الحركة، مع جودة جيدة.",
+  "pros": [
+    {
+      "point": "comfortable",
+      "evidence": [
+        {
+          "review_id": "r1",
+          "snippet": "Very comfortable stroller"
+        }
+      ]
+    },
+    {
+      "point": "smooth ride",
+      "evidence": [
+        {
+          "review_id": "r2",
+          "snippet": "Smooth ride"
+        }
+      ]
+    },
+    {
+      "point": "good quality",
+      "evidence": [
+        {
+          "review_id": "r2",
+          "snippet": "good quality"
+        }
+      ]
+    }
+  ],
+  "cons": [],
+  "disagreements": [],
+  "confidence_score": 0.85,
+  "insufficient_data_flags": [],
+  "user_warning": null
+}

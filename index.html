@@ -1,0 +1,582 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moms Verdict 2.0</title>
+    <link rel="icon" href="data:," />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#f6f5fb",
+                100: "#ece9f8",
+                200: "#d9d3f0",
+                500: "#7c6db7",
+                600: "#6657a2",
+                700: "#564986",
+              },
+            },
+            boxShadow: {
+              soft: "0 10px 30px rgba(36, 28, 74, 0.08)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :root { color-scheme: light; }
+      body { background: #f7f8fb; color: #2f3440; }
+      .scrollbar::-webkit-scrollbar { height: 10px; width: 10px; }
+      .scrollbar::-webkit-scrollbar-thumb { background: #d7dbe6; border-radius: 9999px; }
+      .evidence-hover { transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease; }
+      .evidence-hover:hover { background: #f4f0ff; border-color: #c9bff1; transform: translateY(-1px); }
+      .panel-hover { transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease; }
+      .panel-hover:hover { border-color: #d8dff0; box-shadow: 0 14px 36px rgba(36, 28, 74, 0.09); }
+      .fade-in { animation: fadeIn 180ms ease-out both; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+      .ar-text { direction: rtl; text-align: right; line-height: 1.85; }
+      .confidence-scale { position: relative; height: 20px; }
+      .confidence-marker { position: absolute; top: 2px; width: 1px; height: 16px; background: rgba(91, 76, 156, 0.45); }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <header class="mb-6 flex flex-col gap-2 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Moms Verdict 2.0</h1>
+          <p class="text-sm text-slate-600">AI-powered review insights for parents</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="focusEn" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm">EN focus</button>
+          <button id="focusAr" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm">AR focus</button>
+        </div>
+      </header>
+
+      <main class="grid gap-6 lg:grid-cols-12">
+        <section class="lg:col-span-12 rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
+          <div class="grid gap-4 lg:grid-cols-12">
+            <div class="lg:col-span-8">
+              <label for="reviewsInput" class="mb-2 block text-sm font-medium text-slate-700">Reviews</label>
+              <textarea id="reviewsInput" rows="9" class="scrollbar w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white" placeholder='Paste product reviews (English or Arabic)...&#10;Or use JSON like [{"id":"r1","text":"..."},{"id":"r2","text":"..."}]'></textarea>
+            </div>
+
+            <div class="lg:col-span-4">
+              <label for="fileInput" class="mb-2 block text-sm font-medium text-slate-700">Optional JSON upload</label>
+              <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
+                <input id="fileInput" type="file" accept=".json,application/json" class="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-brand-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-brand-700" />
+                <p class="mt-3 text-xs leading-5 text-slate-500">
+                  Upload a JSON array of review objects with <code class="rounded bg-slate-100 px-1 py-0.5">id</code> and <code class="rounded bg-slate-100 px-1 py-0.5">text</code>.
+                </p>
+              </div>
+
+              <div class="mt-4 flex items-center gap-3">
+                <button id="generateBtn" disabled class="inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300">Generate Verdict</button>
+                <div id="status" class="text-sm text-slate-500"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="outputWrap" class="hidden lg:col-span-12 space-y-6">
+          <div id="loadingCard" class="hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-soft">
+            <div class="flex items-center gap-3 text-sm text-slate-600">
+              <div class="h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent"></div>
+              Generating verdict...
+            </div>
+          </div>
+
+          <div id="errorCard" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"></div>
+
+          <div id="summaryCard" class="hidden panel-hover rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+            <div class="mb-4 flex items-center justify-between"><h2 class="text-base font-semibold text-slate-900">Summary</h2></div>
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="rounded-xl bg-slate-50 p-4">
+                <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">English</div>
+                <p id="summaryEn" class="text-sm leading-6 text-slate-700"></p>
+              </div>
+              <div class="rounded-xl bg-slate-50 p-4 ar-text" dir="rtl">
+                <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">العربية</div>
+                <p id="summaryAr" class="text-sm leading-7 text-slate-700"></p>
+              </div>
+            </div>
+            <div id="keyInsight" class="mt-4 hidden rounded-xl border-l-4 border-brand-500 bg-brand-50 px-4 py-3 text-sm font-medium text-slate-800"></div>
+          </div>
+
+          <div id="prosConsCard" class="hidden panel-hover rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+            <div class="mb-4 flex items-center justify-between"><h2 class="text-base font-semibold text-slate-900">Pros & Cons</h2></div>
+            <div class="grid gap-4 md:grid-cols-2">
+              <div>
+                <div class="mb-3 text-sm font-semibold text-emerald-700">Pros</div>
+                <div id="prosList" class="space-y-3"></div>
+              </div>
+              <div>
+                <div class="mb-3 text-sm font-semibold text-rose-700">Cons</div>
+                <div id="consList" class="space-y-3"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="disagreementsCard" class="hidden panel-hover rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+            <h2 class="mb-4 text-base font-semibold text-slate-900">Conflicting Feedback</h2>
+            <div id="disagreementsList" class="space-y-3"></div>
+          </div>
+
+          <div id="confidenceCard" class="hidden panel-hover rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+            <div class="mb-3 flex items-center justify-between">
+              <h2 class="text-base font-semibold text-slate-900">Confidence</h2>
+              <div id="confidenceValue" class="text-sm font-semibold text-slate-700"></div>
+            </div>
+            <div class="confidence-scale mb-2">
+              <div class="absolute inset-x-0 top-2 h-2 rounded-full bg-slate-100"></div>
+              <div id="confidenceMarker" class="confidence-marker" style="left: 70%;"></div>
+              <div id="confidenceBar" class="absolute top-2 h-2 rounded-full bg-brand-500 transition-all"></div>
+            </div>
+            <div class="mb-2 flex justify-between text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+              <span>Low</span>
+              <span>Medium</span>
+              <span>High</span>
+            </div>
+            <div id="confidenceWarning" class="mt-3 hidden rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800"></div>
+          </div>
+
+          <div id="metadataCard" class="hidden panel-hover rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+            <h2 class="mb-4 text-base font-semibold text-slate-900">Metadata</h2>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="rounded-xl bg-slate-50 p-4">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Review count</div>
+                <div id="reviewCount" class="mt-1 text-lg font-semibold text-slate-900"></div>
+              </div>
+              <div class="rounded-xl bg-slate-50 p-4">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Insufficient data flags</div>
+                <div id="flagsWrap" class="mt-2 flex flex-wrap gap-2"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const sampleReviews = [
+        { id: "r1", text: "The stroller is very sturdy and smooth to push." },
+        { id: "r2", text: "Good quality but a bit heavy." },
+        { id: "r3", text: "العربة ممتازة وسهلة الاستخدام" },
+        { id: "r4", text: "Wheel broke after a week, not safe." },
+        { id: "r5", text: "Decent but overpriced for what it offers." },
+      ];
+
+      const sampleVerdict = {
+        summary_en: "The stroller is sturdy and smooth to push, but has mixed reviews on weight and safety.",
+        summary_ar: "العربة ثابتة وسهلة الاستخدام، لكنها ثقيلة قليلًا وتثير قلقًا بشأن السلامة.",
+        pros: [
+          { point: "sturdy", evidence: [{ review_id: "r1", snippet: "very sturdy" }] },
+          { point: "smooth to push", evidence: [{ review_id: "r1", snippet: "smooth to push" }] },
+          { point: "good quality", evidence: [{ review_id: "r2", snippet: "Good quality" }] },
+          { point: "easy to use", evidence: [{ review_id: "r3", snippet: "سهلة الاستخدام" }] },
+        ],
+        cons: [
+          { point: "heavy", evidence: [{ review_id: "r2", snippet: "a bit heavy" }] },
+          { point: "not safe", evidence: [{ review_id: "r4", snippet: "not safe" }] },
+          { point: "overpriced", evidence: [{ review_id: "r5", snippet: "overpriced for what it offers" }] },
+        ],
+        disagreements: ["weight", "safety"],
+        confidence_score: 0.8,
+        insufficient_data_flags: [],
+        user_warning: null,
+      };
+
+      const els = {
+        input: document.getElementById("reviewsInput"),
+        file: document.getElementById("fileInput"),
+        button: document.getElementById("generateBtn"),
+        status: document.getElementById("status"),
+        outputWrap: document.getElementById("outputWrap"),
+        loadingCard: document.getElementById("loadingCard"),
+        errorCard: document.getElementById("errorCard"),
+        summaryCard: document.getElementById("summaryCard"),
+        prosConsCard: document.getElementById("prosConsCard"),
+        disagreementsCard: document.getElementById("disagreementsCard"),
+        confidenceCard: document.getElementById("confidenceCard"),
+        metadataCard: document.getElementById("metadataCard"),
+        summaryEn: document.getElementById("summaryEn"),
+        summaryAr: document.getElementById("summaryAr"),
+        keyInsight: document.getElementById("keyInsight"),
+        prosList: document.getElementById("prosList"),
+        consList: document.getElementById("consList"),
+        disagreementsList: document.getElementById("disagreementsList"),
+        confidenceValue: document.getElementById("confidenceValue"),
+        confidenceBar: document.getElementById("confidenceBar"),
+        confidenceMarker: document.getElementById("confidenceMarker"),
+        confidenceWarning: document.getElementById("confidenceWarning"),
+        reviewCount: document.getElementById("reviewCount"),
+        flagsWrap: document.getElementById("flagsWrap"),
+      };
+
+      let currentFocus = "en";
+
+      function setStatus(text) { els.status.textContent = text || ""; }
+      function showError(message) { els.errorCard.textContent = message; els.errorCard.classList.remove("hidden"); }
+      function hideError() { els.errorCard.classList.add("hidden"); els.errorCard.textContent = ""; }
+      function setLoading(loading) {
+        els.loadingCard.classList.toggle("hidden", !loading);
+        els.loadingCard.innerHTML = loading
+          ? '<div class="flex items-center gap-3 text-sm text-slate-600"><div class="h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent"></div>Analyzing...</div>'
+          : '<div class="flex items-center gap-3 text-sm text-slate-600"><div class="h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent"></div>Generating verdict...</div>';
+        els.outputWrap.classList.remove("hidden");
+        els.button.disabled = loading || !els.input.value.trim();
+        els.button.innerHTML = loading
+          ? '<span class="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent align-[-2px]"></span><span>Analyzing...</span>'
+          : "Generate Verdict";
+      }
+
+      function formatPointLabel(point) {
+        const normalized = String(point || "").trim().toLowerCase();
+        const map = {
+          sturdy: "Sturdy build",
+          "smooth to push": "Smooth to push",
+          "good quality": "Good quality",
+          "easy to use": "Easy to use",
+          heavy: "Relatively heavy",
+          "not safe": "Safety concern",
+          overpriced: "Overpriced",
+          weight: "Weight concerns",
+          safety: "Safety concerns",
+          price: "Price concerns",
+        };
+        const label = map[normalized] || normalized;
+        return label ? label.charAt(0).toUpperCase() + label.slice(1) : "";
+      }
+
+      function distillInsight(summary) {
+        const text = String(summary || "").replace(/\s+/g, " ").trim();
+        if (!text) return "";
+        const cleaned = text
+          .replace(/^The stroller is /i, "")
+          .replace(/^Reviews are mixed, with /i, "")
+          .replace(/^The product is /i, "");
+        const sentence = cleaned.split(/[.!?]/)[0].trim();
+        const words = sentence.split(/\s+/).slice(0, 15);
+        return words.join(" ").replace(/[,;]\s*$/, "");
+      }
+
+      function parseReviews(raw) {
+        const trimmed = raw.trim();
+        if (!trimmed) return [];
+
+        if (trimmed.startsWith("[{") || trimmed.startsWith("[\n{")) {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) {
+            return parsed.map((r, index) => ({
+              id: String(r.id || `r${index + 1}`),
+              text: String(r.text || ""),
+            })).filter(r => r.text.trim());
+          }
+        }
+
+        return trimmed.split(/\n+/).map((line, index) => {
+          const match = line.match(/^\s*\[([^\]]+)\]\s*(.*)$/);
+          if (match) return { id: match[1].trim(), text: match[2].trim() };
+          return { id: `r${index + 1}`, text: line.trim() };
+        }).filter(r => r.text.trim());
+      }
+
+      function renderEvidenceList(container, items, reviewsById) {
+        container.innerHTML = "";
+        if (!items.length) {
+          container.innerHTML = '<div class="rounded-xl border border-dashed border-slate-200 p-3 text-sm text-slate-500">None</div>';
+          return;
+        }
+
+        items.forEach((item) => {
+          const evidenceHtml = (item.evidence || []).map((ev) => {
+            const review = reviewsById[ev.review_id];
+            const snippet = ev.snippet || review?.text || "";
+            return `
+              <div class="evidence-hover rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-brand-700">
+                  <span class="rounded-full bg-white px-2 py-1 shadow-sm">${ev.review_id}</span>
+                  <span class="text-slate-500">Evidence</span>
+                </div>
+                <p class="mt-1 text-sm leading-6 text-slate-700">“${escapeHtml(snippet)}”</p>
+              </div>`;
+          }).join("");
+
+          const card = document.createElement("div");
+          card.className = "rounded-xl border border-slate-200 bg-slate-50 p-3";
+          card.innerHTML = `
+            <div class="text-sm font-semibold text-slate-900">${escapeHtml(formatPointLabel(item.point))}</div>
+            <div class="mt-2 space-y-2">${evidenceHtml}</div>`;
+          container.appendChild(card);
+        });
+      }
+
+      function inferConflictDetails(verdict, theme) {
+        const normalizedTheme = String(theme || "").toLowerCase();
+        const positive = new Set();
+        const negative = new Set();
+
+        const collect = (points, bucket) => {
+          points.forEach((item) => {
+            const point = String(item.point || "").toLowerCase();
+            const ids = (item.evidence || []).map((ev) => ev.review_id).filter(Boolean);
+            const match =
+              point.includes(normalizedTheme) ||
+              (normalizedTheme === "weight" && (point.includes("heavy") || point.includes("weight"))) ||
+              (normalizedTheme === "safety" && (point.includes("safe") || point.includes("safety") || point.includes("unsafe"))) ||
+              (normalizedTheme === "price" && (point.includes("price") || point.includes("overpriced") || point.includes("value"))) ||
+              (normalizedTheme === "quality" && point.includes("quality")) ||
+              (normalizedTheme === "ease of use" && point.includes("easy to use")) ||
+              (normalizedTheme === "sturdy" && point.includes("sturdy")) ||
+              (normalizedTheme === "smooth to push" && point.includes("smooth"));
+            if (match) ids.forEach((id) => bucket.add(id));
+          });
+        };
+
+        collect(verdict.pros || [], positive);
+        collect(verdict.cons || [], negative);
+
+        return {
+          topic: formatPointLabel(normalizedTheme),
+          positive: Array.from(positive),
+          negative: Array.from(negative),
+        };
+      }
+
+      function renderDisagreements(verdict) {
+        els.disagreementsList.innerHTML = "";
+        const items = verdict.disagreements || [];
+        if (!items.length) {
+          els.disagreementsList.innerHTML = '<div class="rounded-xl border border-dashed border-slate-200 p-3 text-sm text-slate-500">None</div>';
+          return;
+        }
+        let rendered = 0;
+        items.forEach((theme) => {
+          const detail = inferConflictDetails(verdict, theme);
+          if (!detail.positive.length || !detail.negative.length) {
+            return;
+          }
+          const row = document.createElement("div");
+          row.className = "rounded-xl border border-slate-200 bg-slate-50 p-4";
+          row.innerHTML = `
+            <div class="mb-3 flex items-center justify-between gap-3">
+              <div class="text-sm font-semibold text-slate-900">${escapeHtml(detail.topic)}</div>
+              <span class="rounded-full bg-white px-2 py-1 text-xs font-semibold text-slate-500">mixed</span>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+                <div class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Positive</div>
+                <div class="mt-1">${detail.positive.length ? detail.positive.map((id) => `<span class="mr-1 inline-flex rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-emerald-700">${escapeHtml(id)}</span>`).join("") : '<span class="text-emerald-700">Not explicit</span>'}</div>
+              </div>
+              <div class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-900">
+                <div class="text-xs font-semibold uppercase tracking-wide text-rose-700">Negative</div>
+                <div class="mt-1">${detail.negative.length ? detail.negative.map((id) => `<span class="mr-1 inline-flex rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-rose-700">${escapeHtml(id)}</span>`).join("") : '<span class="text-rose-700">Not explicit</span>'}</div>
+              </div>
+            </div>`;
+          els.disagreementsList.appendChild(row);
+          rendered += 1;
+        });
+        if (!rendered) {
+          els.disagreementsList.innerHTML = '<div class="rounded-xl border border-dashed border-slate-200 p-3 text-sm text-slate-500">None</div>';
+        }
+      }
+
+      function renderFlags(flags) {
+        els.flagsWrap.innerHTML = "";
+        if (!flags || !flags.length) {
+          els.flagsWrap.innerHTML = '<span class="text-sm text-slate-500">None</span>';
+          return;
+        }
+        flags.forEach((flag) => {
+          const el = document.createElement("span");
+          el.className = "rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700";
+          el.textContent = flag;
+          els.flagsWrap.appendChild(el);
+        });
+      }
+
+      function renderVerdict(verdict, reviews) {
+        const reviewsById = Object.fromEntries(reviews.map((r) => [r.id, r]));
+        const score = Number(verdict.confidence_score || 0);
+
+        els.summaryEn.textContent = verdict.summary_en || "";
+        els.summaryAr.textContent = verdict.summary_ar || "";
+        const insight = distillInsight(verdict.summary_en || "");
+        els.keyInsight.textContent = insight ? `💡 Key Insight: ${insight}` : "";
+        els.keyInsight.classList.toggle("hidden", !insight);
+        renderEvidenceList(els.prosList, verdict.pros || [], reviewsById);
+        renderEvidenceList(els.consList, verdict.cons || [], reviewsById);
+        renderDisagreements(verdict);
+        renderFlags(verdict.insufficient_data_flags || []);
+
+        els.confidenceValue.textContent = score.toFixed(2);
+        els.confidenceBar.style.width = `${Math.round(score * 100)}%`;
+        els.confidenceBar.style.left = "0";
+        els.confidenceBar.className = `absolute top-2 h-2 rounded-full transition-all ${score < 0.5 ? "bg-rose-500" : score < 0.7 ? "bg-amber-500" : "bg-brand-500"}`;
+        if (score < 0.7) {
+          els.confidenceWarning.textContent = "⚠️ Reviews are mixed or limited. Consider reading detailed feedback before purchasing.";
+          els.confidenceWarning.classList.remove("hidden");
+        } else {
+          els.confidenceWarning.textContent = "";
+          els.confidenceWarning.classList.add("hidden");
+        }
+        els.reviewCount.textContent = String(reviews.length);
+
+        [els.summaryCard, els.prosConsCard, els.disagreementsCard, els.confidenceCard, els.metadataCard].forEach((card) => card.classList.remove("hidden"));
+        els.outputWrap.classList.add("fade-in");
+
+        document.documentElement.lang = currentFocus === "ar" ? "ar" : "en";
+        els.summaryAr.parentElement.setAttribute("dir", "rtl");
+        els.summaryEn.parentElement.setAttribute("dir", "ltr");
+        els.summaryAr.classList.add("ar-text");
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      async function tryBackend(reviews) {
+        const apiUrl = window.MOMS_VERDICT_API_URL || "/verdict";
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reviews }),
+        });
+        if (!response.ok) throw new Error(`Backend error: ${response.status}`);
+        return response.json();
+      }
+
+      async function generate() {
+        hideError();
+        const reviews = parseReviews(els.input.value);
+        if (!reviews.length) {
+          showError("Please enter reviews or upload a JSON file.");
+          return;
+        }
+
+        setLoading(true);
+        setStatus(`Processing ${reviews.length} review${reviews.length === 1 ? "" : "s"}`);
+
+        try {
+          let verdict;
+          try {
+            verdict = await tryBackend(reviews);
+            setStatus("Connected to backend");
+          } catch {
+            verdict = buildMockVerdict(reviews);
+            setStatus("Using local demo mode");
+          }
+          renderVerdict(verdict, reviews);
+        } catch {
+          showError("Could not generate a verdict. Please check the input and try again.");
+        } finally {
+          setLoading(false);
+          setStatus("");
+        }
+      }
+
+      function buildMockVerdict(reviews) {
+        if (!reviews.length) return sampleVerdict;
+        const text = (value) => String(value || "").toLowerCase();
+        const containsTerm = (haystack, term) => {
+          const value = String(haystack || "").toLowerCase();
+          const needle = String(term || "").toLowerCase().trim();
+          if (!needle) return false;
+          if (/^[a-z0-9 ]+$/.test(needle) && !needle.includes(" ")) {
+            return new RegExp(`(^|[^\\w])${needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^\\w]|$)`).test(value);
+          }
+          return value.includes(needle);
+        };
+        const find = (patterns) => reviews.filter((r) => patterns.some((p) => containsTerm(r.text, p)));
+        const makeEvidence = (review) => ({
+          review_id: review.id,
+          snippet: String(review.text || "").slice(0, 80),
+        });
+        const hasAny = (patterns) => reviews.some((r) => patterns.some((p) => containsTerm(r.text, p)));
+
+        const sturdyReviews = find(["sturdy", "solid", "stable", "ثابت"]);
+        const smoothReviews = find(["smooth", "push", "سلس", "سهل الدفع"]);
+        const qualityReviews = find(["good quality", "quality", "excellent quality", "جودة", "ممتاز", "quality"]);
+        const easyReviews = find(["easy to use", "easy", "simple", "سهولة الاستخدام", "سهلة الاستخدام", "سهل الاستخدام"]);
+        const heavyReviews = find(["heavy", "heavier", "weight", "ثقيل"]);
+        const safetyReviews = find(["unsafe", "not safe", "dangerous", "safe", "broke", "broken", "غير آمن"]);
+        const priceReviews = find(["overpriced", "expensive", "price", "value", "cost", "غالي", "سعر"]);
+
+        const hasPositiveSafety = reviews.some((r) => {
+          const v = text(r.text);
+          return (containsTerm(v, "safe") || containsTerm(v, "secure") || containsTerm(v, "stable")) &&
+            !/not safe|unsafe|dangerous|غير آمن/.test(v);
+        });
+        const hasNegativeSafety = reviews.some((r) => {
+          const v = text(r.text);
+          return /not safe|unsafe|dangerous|غير آمن|broke|broken/.test(v);
+        });
+
+        const mixedThemes = [];
+        if (hasAny(["heavy", "heavier", "weight", "ثقيل"]) && hasAny(["lightweight", "light", "خفيف"])) mixedThemes.push("weight");
+        if (hasPositiveSafety && hasNegativeSafety) mixedThemes.push("safety");
+        if (hasAny(["quality", "جودة", "ممتاز", "excellent", "good"]) && hasAny(["bad", "poor", "terrible", "سيئ"])) mixedThemes.push("quality");
+        if (hasAny(["durable", "durability", "متانة"]) && hasAny(["broke", "broken", "broke after", "break"])) mixedThemes.push("durability");
+
+        return {
+          summary_en: mixedThemes.length
+            ? "Reviews are mixed, with disagreements on the highlighted themes."
+            : (reviews.length > 2
+              ? "The stroller is praised for sturdiness and smooth handling, with concerns about weight, safety, and price."
+              : "The reviews are too sparse to make a confident judgment."),
+          summary_ar: mixedThemes.length
+            ? "المراجعات متباينة حول الموضوعات المذكورة."
+            : (reviews.length > 2
+              ? "العربة موصوفة بأنها ثابتة وسهلة الدفع، مع ملاحظات سلبية بشأن الوزن والسلامة والسعر."
+              : "المراجعات قليلة جدًا ولا تكفي لإصدار خلاصة موثوقة."),
+          pros: [
+            ...(sturdyReviews.length ? [{ point: "sturdy", evidence: sturdyReviews.slice(0, 1).map(makeEvidence) }] : []),
+            ...(smoothReviews.length ? [{ point: "smooth to push", evidence: smoothReviews.slice(0, 1).map(makeEvidence) }] : []),
+            ...(qualityReviews.length ? [{ point: "good quality", evidence: qualityReviews.slice(0, 1).map(makeEvidence) }] : []),
+            ...(easyReviews.length ? [{ point: "easy to use", evidence: easyReviews.slice(0, 1).map(makeEvidence) }] : []),
+          ],
+          cons: [
+            ...(heavyReviews.length ? [{ point: "heavy", evidence: heavyReviews.slice(0, 1).map(makeEvidence) }] : []),
+            ...(safetyReviews.filter((r) => /unsafe|not safe|dangerous|broke|broken/i.test(String(r.text || ""))).length
+              ? [{ point: "not safe", evidence: safetyReviews.filter((r) => /unsafe|not safe|dangerous|broke|broken/i.test(String(r.text || ""))).slice(0, 1).map(makeEvidence) }]
+              : []),
+            ...(priceReviews.length ? [{ point: "overpriced", evidence: priceReviews.slice(0, 1).map(makeEvidence) }] : []),
+          ],
+          disagreements: mixedThemes,
+          confidence_score: reviews.length > 2 ? 0.68 : 0.35,
+          insufficient_data_flags: reviews.length > 2 ? [] : ["insufficient_evidence"],
+          user_warning: reviews.length > 2 ? null : "Insufficient evidence to provide a reliable summary.",
+        };
+      }
+
+      els.input.addEventListener("input", () => { els.button.disabled = !els.input.value.trim(); });
+      els.file.addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        const text = await file.text();
+        try {
+          const parsed = JSON.parse(text);
+          els.input.value = JSON.stringify(parsed, null, 2);
+          els.button.disabled = !els.input.value.trim();
+          setStatus("Loaded JSON file");
+        } catch {
+          showError("The uploaded file must be valid JSON.");
+        }
+      });
+      document.getElementById("generateBtn").addEventListener("click", generate);
+      document.getElementById("focusEn").addEventListener("click", () => { currentFocus = "en"; setStatus("English focus"); });
+      document.getElementById("focusAr").addEventListener("click", () => { currentFocus = "ar"; setStatus("Arabic focus"); });
+
+      els.input.value = sampleReviews.map((r) => `[${r.id}] ${r.text}`).join("\n");
+      els.button.disabled = false;
+    </script>
+  </body>
+</html>

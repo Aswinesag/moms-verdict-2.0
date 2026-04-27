@@ -1,0 +1,12 @@
+{
+  "summary_en": "Insufficient grounded evidence to summarize.",
+  "summary_ar": "لا توجد أدلة كافية لإصدار خلاصة موثوقة.",
+  "pros": [],
+  "cons": [],
+  "disagreements": [],
+  "confidence_score": 0.0,
+  "insufficient_data_flags": [
+    "limited_review_count"
+  ],
+  "user_warning": "Insufficient evidence to provide a reliable summary."
+}

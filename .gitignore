@@ -1,0 +1,13 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Common environment/sensitive files
+.env
+*.log
+
+# Common IDE/Editor folders
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,34 @@
+{
+  "summary_en": "The product's durability is a point of contention among reviewers.",
+  "summary_ar": "الجودة المتينة هي نقطة خلاف بين المراجعين.",
+  "pros": [
+    {
+      "point": "durable",
+      "evidence": [
+        {
+          "review_id": "r1",
+          "snippet": "Very durable"
+        }
+      ]
+    }
+  ],
+  "cons": [
+    {
+      "point": "not durable",
+      "evidence": [
+        {
+          "review_id": "r2",
+          "snippet": "Broke after two days"
+        }
+      ]
+    }
+  ],
+  "disagreements": [
+    "durability"
+  ],
+  "confidence_score": 0.5,
+  "insufficient_data_flags": [
+    "limited_review_count"
+  ],
+  "user_warning": null
+}

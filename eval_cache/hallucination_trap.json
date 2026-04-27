@@ -1,0 +1,31 @@
+{
+  "summary_en": "This stroller is easy to use.",
+  "summary_ar": "العربة سهلة الاستخدام.",
+  "pros": [
+    {
+      "point": "Easy to use",
+      "evidence": [
+        {
+          "review_id": "r2",
+          "snippet": "Easy to use"
+        }
+      ]
+    },
+    {
+      "point": "Good stroller",
+      "evidence": [
+        {
+          "review_id": "r1",
+          "snippet": "Good stroller"
+        }
+      ]
+    }
+  ],
+  "cons": [],
+  "disagreements": [],
+  "confidence_score": 0.6,
+  "insufficient_data_flags": [
+    "limited_review_count"
+  ],
+  "user_warning": null
+}

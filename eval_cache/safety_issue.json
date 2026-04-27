@@ -1,0 +1,31 @@
+{
+  "summary_en": "Reviewers have raised concerns about the product's safety.",
+  "summary_ar": "المراجعات تشير إلى مخاوف بشأن سلامة المنتج.",
+  "pros": [],
+  "cons": [
+    {
+      "point": "unsafe",
+      "evidence": [
+        {
+          "review_id": "r1",
+          "snippet": "Wheel fell off, unsafe"
+        }
+      ]
+    },
+    {
+      "point": "feels dangerous",
+      "evidence": [
+        {
+          "review_id": "r2",
+          "snippet": "Feels dangerous"
+        }
+      ]
+    }
+  ],
+  "disagreements": [],
+  "confidence_score": 0.6,
+  "insufficient_data_flags": [
+    "limited_review_count"
+  ],
+  "user_warning": null
+}

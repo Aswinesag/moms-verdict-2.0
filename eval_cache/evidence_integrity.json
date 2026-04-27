@@ -1,0 +1,31 @@
+{
+  "summary_en": "The product is known for its durability and high quality.",
+  "summary_ar": "المنتج متين وذو جودة عالية.",
+  "pros": [
+    {
+      "point": "durable",
+      "evidence": [
+        {
+          "review_id": "r1",
+          "snippet": "Very durable"
+        }
+      ]
+    },
+    {
+      "point": "high quality",
+      "evidence": [
+        {
+          "review_id": "r2",
+          "snippet": "High quality"
+        }
+      ]
+    }
+  ],
+  "cons": [],
+  "disagreements": [],
+  "confidence_score": 0.6,
+  "insufficient_data_flags": [
+    "limited_review_count"
+  ],
+  "user_warning": null
+}

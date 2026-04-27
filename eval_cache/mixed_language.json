@@ -1,0 +1,22 @@
+{
+  "summary_en": "This stroller is lightweight, but opinions are limited.",
+  "summary_ar": "العربة خفيفة الوزن، لكن آراء المستخدمين محدودة.",
+  "pros": [
+    {
+      "point": "Lightweight",
+      "evidence": [
+        {
+          "review_id": "r1",
+          "snippet": "Lightweight stroller"
+        }
+      ]
+    }
+  ],
+  "cons": [],
+  "disagreements": [],
+  "confidence_score": 0.5,
+  "insufficient_data_flags": [
+    "limited_review_count"
+  ],
+  "user_warning": null
+}

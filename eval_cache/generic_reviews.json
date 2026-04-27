@@ -1,0 +1,31 @@
+{
+  "summary_en": "The product has received positive feedback, but the reviews are too brief to provide a detailed summary.",
+  "summary_ar": "المنتج حصل على تعليقات إيجابية، لكن المراجعات قصيرة جدًا لتقديم ملخص مفصل.",
+  "pros": [
+    {
+      "point": "Nice",
+      "evidence": [
+        {
+          "review_id": "r1",
+          "snippet": "Nice"
+        }
+      ]
+    },
+    {
+      "point": "Good",
+      "evidence": [
+        {
+          "review_id": "r2",
+          "snippet": "Good"
+        }
+      ]
+    }
+  ],
+  "cons": [],
+  "disagreements": [],
+  "confidence_score": 0.2,
+  "insufficient_data_flags": [
+    "limited_review_count"
+  ],
+  "user_warning": "Insufficient evidence to provide a reliable summary."
+}

@@ -1,0 +1,52 @@
+{
+  "summary_en": "Mixed opinions on quality.",
+  "summary_ar": "آراء متباينة حول الجودة.",
+  "pros": [
+    {
+      "point": "Excellent quality",
+      "evidence": [
+        {
+          "review_id": "r1",
+          "snippet": "Excellent quality"
+        }
+      ]
+    },
+    {
+      "point": "Not bad",
+      "evidence": [
+        {
+          "review_id": "r3",
+          "snippet": "Not bad"
+        }
+      ]
+    }
+  ],
+  "cons": [
+    {
+      "point": "Terrible quality",
+      "evidence": [
+        {
+          "review_id": "r2",
+          "snippet": "Terrible quality"
+        }
+      ]
+    },
+    {
+      "point": "Very poor durability",
+      "evidence": [
+        {
+          "review_id": "r4",
+          "snippet": "Very poor durability"
+        }
+      ]
+    }
+  ],
+  "disagreements": [
+    "quality"
+  ],
+  "confidence_score": 0.5,
+  "insufficient_data_flags": [
+    "limited_review_count"
+  ],
+  "user_warning": null
+}

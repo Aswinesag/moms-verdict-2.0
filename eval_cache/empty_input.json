@@ -1,0 +1,51 @@
+{
+  "summary_en": "The product has mixed reviews on weight and quality, but is generally considered easy to use and comfortable.",
+  "summary_ar": "المنتج له آراء متباينة حول الوزن والجودة، لكنه يعتبر عمومًا سهل الاستخدام ومريح.",
+  "pros": [
+    {
+      "point": "easy to use",
+      "evidence": [
+        {
+          "review_id": "review1",
+          "snippet": "very easy to use"
+        }
+      ]
+    },
+    {
+      "point": "comfortable",
+      "evidence": [
+        {
+          "review_id": "review2",
+          "snippet": "very comfortable"
+        }
+      ]
+    }
+  ],
+  "cons": [
+    {
+      "point": "heavy",
+      "evidence": [
+        {
+          "review_id": "review3",
+          "snippet": "a bit heavy"
+        }
+      ]
+    },
+    {
+      "point": "poor quality",
+      "evidence": [
+        {
+          "review_id": "review4",
+          "snippet": "not the best quality"
+        }
+      ]
+    }
+  ],
+  "disagreements": [
+    "weight",
+    "quality"
+  ],
+  "confidence_score": 0.8,
+  "insufficient_data_flags": [],
+  "user_warning": null
+}
