@@ -1,9 +1,7 @@
 import re
 from typing import Dict, List
 
-
 ARABIC_RE = re.compile(r"[\u0600-\u06FF]")
-
 
 def _confidence_band_expected(reviews: List[dict]) -> str:
     if len(reviews) == 0:

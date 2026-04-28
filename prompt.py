@@ -101,7 +101,6 @@ Schema:
 }
 """
 
-
 def build_prompt(reviews):
     review_text = "\n".join(f"[{r['id']}] {r['text']}" for r in reviews)
 

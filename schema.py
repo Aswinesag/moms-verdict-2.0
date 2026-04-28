@@ -2,7 +2,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-
 class EvidenceRef(BaseModel):
     review_id: str = Field(min_length=1)
     snippet: Optional[str] = None

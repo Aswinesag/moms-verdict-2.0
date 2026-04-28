@@ -10,7 +10,6 @@ HOST = "127.0.0.1"
 PORT = 8000
 INDEX_PATH = Path("index.html")
 
-
 def _json_response(handler, status, payload):
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     handler.send_response(status)

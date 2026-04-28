@@ -1,11 +1,9 @@
 import argparse
 import json
 from pathlib import Path
-
 from evaluator import evaluate_output
 from main import generate_verdict_for_reviews
 from schema import MomsVerdict
-
 
 TEST_CASES = [
     {
